@@ -1,12 +1,8 @@
 package ed.inf.adbs.minibase;
 
-import com.sun.org.apache.xpath.internal.functions.FuncFalse;
-import ed.inf.adbs.minibase.base.*;
+import base.*;
 import ed.inf.adbs.minibase.parser.QueryParser;
 
-import javax.management.relation.Relation;
-import javax.print.DocFlavor;
-import javax.swing.*;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;

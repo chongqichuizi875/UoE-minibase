@@ -1,11 +1,19 @@
 package ed.inf.adbs.minibase;
 
-import ed.inf.adbs.minibase.base.Atom;
-import ed.inf.adbs.minibase.base.Query;
-import ed.inf.adbs.minibase.base.Head;
+import base.Atom;
+import base.Query;
+import base.Head;
+import base.RelationalAtom;
+import ed.inf.adbs.minibase.evaluator.ScanOperator;
 import ed.inf.adbs.minibase.parser.QueryParser;
+import ed.inf.adbs.minibase.structures.DatabaseCatalog;
+import ed.inf.adbs.minibase.structures.Tuple;
+import ed.inf.adbs.minibase.structures.TypeWrapper;
 
+import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,13 +33,50 @@ public class Minibase {
         String inputFile = args[1];
         String outputFile = args[2];
 
-//        evaluateCQ(databaseDir, inputFile, outputFile);
+        evaluateCQ(databaseDir, inputFile, outputFile);
 
-        parsingExample(inputFile);
+//        parsingExample(inputFile);
     }
 
     public static void evaluateCQ(String databaseDir, String inputFile, String outputFile) {
-        // TODO: add your implementation
+        // parse the query from the input file
+        try{
+            Query query = QueryParser.parse(Paths.get(inputFile));
+            System.out.println("Original query: "+ query);
+            Head head = query.getHead();
+            List<Atom> body = query.getBody();
+            // body type transform
+            List<RelationalAtom> relation_body = new ArrayList<>();
+            for (Atom i: body){
+                relation_body.add((RelationalAtom) i);
+            }
+            DatabaseCatalog databaseCatalog = DatabaseCatalog.getCatalog();
+
+            ScanOperator scan_operator = new ScanOperator(relation_body.get(0), databaseCatalog);
+
+//            System.out.println(scan_operator.getNextTuple().toString());
+//            System.out.println(scan_operator.getNextTuple().toString());
+//            System.out.println(scan_operator.getNextTuple().toString());
+//            System.out.println(scan_operator.getNextTuple().toString());
+////            scan_operator.reset();
+//            System.out.println(scan_operator.getNextTuple().toString());
+//            System.out.println(scan_operator.getNextTuple().toString());
+//            System.out.println(scan_operator.getNextTuple().toString());
+//            System.out.println(scan_operator.getNextTuple().toString());
+//            System.out.println(scan_operator.getNextTuple().toString());
+//            System.out.println(scan_operator.getNextTuple().toString());
+            List<Tuple> lst = scan_operator.dump();
+            System.out.println("----------------------------------------");
+            for (Tuple tp: lst){
+                System.out.println(tp.toString());
+            }
+
+
+        } catch (IOException e) {
+            System.err.println("Exception occurred during Scan Operation");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     /**

@@ -1,9 +1,9 @@
 package ed.inf.adbs.minibase.parser;
 
+import base.*;
 import ed.inf.adbs.minibase.parser.generated.MinibaseBaseVisitor;
 import ed.inf.adbs.minibase.parser.generated.MinibaseLexer;
 import ed.inf.adbs.minibase.parser.generated.MinibaseParser;
-import ed.inf.adbs.minibase.base.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;

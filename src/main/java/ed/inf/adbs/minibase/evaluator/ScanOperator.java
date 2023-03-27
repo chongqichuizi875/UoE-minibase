@@ -7,9 +7,8 @@ import ed.inf.adbs.minibase.structures.DatabaseCatalog;
 import ed.inf.adbs.minibase.structures.Tuple;
 import ed.inf.adbs.minibase.structures.TypeWrapper;
 
-import javax.xml.xpath.XPath;
+
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,21 +16,19 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ScanOperator extends Operator{
-    private DatabaseCatalog catalog;
     private Tuple tuple;
     private List<Term> original_terms;
     private BufferedReader br;
-    private List<Boolean> types;
-
+    private List<Boolean> schema;
+    private RelationalAtom relation_atom;
     private String filepath;
 
     public ScanOperator(RelationalAtom atom, DatabaseCatalog catalog){
+        this.relation_atom = atom;
         String atom_name = atom.getName();
         this.tuple = new Tuple(atom_name); // get the relation/table/atom name
-        this.original_terms = atom.getTerms();
-        this.catalog = catalog;
 
-        this.types = catalog.getType_map().get(atom_name);
+        this.schema = catalog.getSchema_map().get(atom_name);
         filepath = catalog.getLocation_map().get(atom_name);
         try{
             this.br = new BufferedReader(new FileReader(filepath));
@@ -40,6 +37,8 @@ public class ScanOperator extends Operator{
             throw new RuntimeException(e);
         }
     }
+
+    public RelationalAtom getRelation_atom(){return this.relation_atom;}
 
     @Override
     public void reset() throws IOException {
@@ -68,9 +67,9 @@ public class ScanOperator extends Operator{
 
     public List<TypeWrapper> LineWrapper(String str){
         List<TypeWrapper> line_wrapper = new ArrayList<>();
-        List<String> sn = Arrays.asList(str.split(","));
-        for (int i = 0; i<this.types.size();i++){
-            line_wrapper.add(new TypeWrapper(this.types.get(i), sn.get(i).trim()));
+        List<String> ls = Arrays.asList(str.split(","));
+        for (int i = 0; i<this.schema.size();i++){
+            line_wrapper.add(new TypeWrapper(this.schema.get(i), ls.get(i).trim()));
         }
         return line_wrapper;
     }

@@ -18,11 +18,11 @@ public class StringConstant extends Constant {
 
     @Override
     public boolean equals(Object obj) {
-        return (obj instanceof StringConstant) && (((StringConstant) obj).value.equals(this.value));
+        return (obj instanceof StringConstant) && (((StringConstant) obj).value.equals(this.toString()));
     }
 
     @Override
     public int hashCode(){
-        return 17*31 + value.hashCode();
+        return 17*31 + this.toString().hashCode();
     }
 }

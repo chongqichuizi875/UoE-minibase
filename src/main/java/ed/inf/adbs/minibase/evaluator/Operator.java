@@ -1,5 +1,6 @@
 package ed.inf.adbs.minibase.evaluator;
 
+import base.RelationalAtom;
 import ed.inf.adbs.minibase.structures.Tuple;
 
 import java.io.IOException;
@@ -16,7 +17,12 @@ public abstract class Operator {
         while ((next_tuple = getNextTuple()) != null) {
             tuple_list.add(new Tuple(next_tuple));
         }
+        reset();
         return tuple_list;
     };
+
+    public RelationalAtom getRelation_atom() {
+        return null;
+    }
 
 }

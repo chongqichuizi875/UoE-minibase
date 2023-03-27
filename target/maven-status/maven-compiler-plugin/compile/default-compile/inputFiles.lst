@@ -19,6 +19,7 @@ C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\base\Compariso
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\structures\Tuple.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\base\Atom.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\parser\generated\MinibaseBaseListener.java
+C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\evaluator\ProjectOperator.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\parser\generated\MinibaseParser.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\base\Constant.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\base\StringConstant.java
@@ -27,3 +28,5 @@ C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\mi
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\structures\DatabaseCatalog.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\base\AtomMap.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\base\Variable.java
+C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\evaluator\QueryPlan.java
+C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\evaluator\SelectOperator.java

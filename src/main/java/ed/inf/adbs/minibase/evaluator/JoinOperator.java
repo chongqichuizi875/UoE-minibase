@@ -2,6 +2,7 @@ package ed.inf.adbs.minibase.evaluator;
 
 import base.*;
 import ed.inf.adbs.minibase.structures.Tuple;
+import ed.inf.adbs.minibase.structures.TypeWrapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +18,7 @@ public class JoinOperator extends Operator{
     private BufferedReader right_br;
     private Tuple left_previous;
     private List<Integer> index1_lis, index2_lis;
+    private List<ComparisonOperator> comparisonOperatorList;
     private Tuple new_tuple;
     private Set<Tuple> return_set;
 
@@ -33,6 +35,7 @@ public class JoinOperator extends Operator{
         List<Term> right_terms = right_child.getRelation_atom().getTerms();
         index1_lis = new ArrayList<>();
         index2_lis = new ArrayList<>();
+        comparisonOperatorList = new ArrayList<>();
         for (ComparisonAtom atom: comparisonAtomList){
             // assert all terms are variable
             // assert if one term in left, the other must in right!
@@ -46,6 +49,7 @@ public class JoinOperator extends Operator{
                     index1_lis.add(index1);
                     index2_lis.add(right_terms.indexOf(atom.getTerm2()));
                 }
+                comparisonOperatorList.add(atom.getOp());
             }
         }
     }
@@ -94,7 +98,10 @@ public class JoinOperator extends Operator{
         while ((right = right_child.getNextTuple())!=null){ // right child next
             boolean equal = true;
             for (int i = 0; i < index1_lis.size(); i++){
-                if (!(left.getWrapInTuple(index1_lis.get(i)).equals(right.getWrapInTuple(index2_lis.get(i))))){
+                TypeWrapper leftwrap = left.getWrapInTuple(index1_lis.get(i));
+                TypeWrapper rightwrap = right.getWrapInTuple(index2_lis.get(i));
+                ComparisonOperator op = comparisonOperatorList.get(i);
+                if (!(Comparing(leftwrap, rightwrap, op))){
                     equal = false;
                     break;
                 }

@@ -116,24 +116,7 @@ public class SelectOperator extends Operator {
         return true;
     }
 
-    public boolean Comparing(TypeWrapper wrap1, TypeWrapper wrap2, ComparisonOperator op) {
-        switch (op.toString()) {
-            case "=":
-                return wrap1.equals(wrap2);
-            case "!=":
-                return !wrap1.equals(wrap2);
-            case ">":
-                return wrap1.isGreaterThan(wrap2);
-            case "<":
-                return wrap1.isLessThan(wrap2);
-            case ">=":
-                return wrap1.isGreaterAndEqual(wrap2);
-            case "<=":
-                return wrap1.isLessAndEqual(wrap2);
-        }
-        System.out.println("Invalid comparison symbol! ");
-        return false;
-    }
+
     @Override
     public BufferedReader getBr(){return child.getBr();}
 }

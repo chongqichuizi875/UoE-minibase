@@ -7,17 +7,89 @@ import ed.inf.adbs.minibase.structures.TypeWrapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class SelectOperator extends Operator {
     private Operator child;
     private RelationalAtom relation_atom;
-    private List<ComparisonAtom> compare_list;
+    private List<ComparisonAtom> comparisonAtomList;
+    private List<Term> terms_in_atom;
+    private List<Integer> compare_index_list;
+    private List<TypeWrapper> compare_wrap_list;
+    private List<ComparisonOperator> comparisonOperatorList;
+    private boolean return_empty;
+    private HashMap<List<Integer>, ComparisonOperator> self_compare_map;
+    private Tuple new_tuple;
 
     public SelectOperator(Operator child, RelationalAtom relation_atom, List<ComparisonAtom> compare_list) {
+        return_empty = false;
         this.child = child;
         this.relation_atom = relation_atom;
-        this.compare_list = compare_list;
+        this.comparisonAtomList = compare_list;
+        this.compare_index_list = new ArrayList<>();
+        this.compare_wrap_list = new ArrayList<>();
+        this.comparisonOperatorList = new ArrayList<>();
+        this.self_compare_map = new HashMap<>();
+        List<Term> terms_in_atom = this.relation_atom.getTerms();
+        new_tuple = new Tuple(relation_atom.getName());
+        // detect implicit comparison R(x, y, 4)
+        for (int i = 0; i < terms_in_atom.size(); i++){
+            Term term = terms_in_atom.get(i);
+            if (term instanceof Constant){
+                compare_index_list.add(i);
+                comparisonOperatorList.add(ComparisonOperator.EQ);
+                compare_wrap_list.add(new TypeWrapper(term));
+            }
+        }
+        for (ComparisonAtom comparison_atom : comparisonAtomList){
+            Term term1 = comparison_atom.getTerm1();
+            Term term2 = comparison_atom.getTerm2();
+            ComparisonOperator op = comparison_atom.getOp();
+            if (!((term1 instanceof Constant || term1 instanceof Variable)
+                    && (term2 instanceof Constant || term2 instanceof Variable))) {
+                System.out.println("Invalid term format! \n terms must be Constant or Variable");
+            }
+            else {
+                // both terms are variable or constant
+                if ((term1 instanceof Constant) && (term2 instanceof Constant)){ // 2 constants
+                    TypeWrapper wrap1 = new TypeWrapper(term1);
+                    TypeWrapper wrap2 = new TypeWrapper(term2);
+                    if(!this.Comparing(wrap1, wrap2, op)) return_empty = true;
+                }
+                if((term1 instanceof Constant) && (term2 instanceof Variable)){
+                    TypeWrapper wrap1 = new TypeWrapper(term1);
+                    compare_wrap_list.add(wrap1);
+                    Variable var = new Variable(((Variable) term2).getName());
+                    // find the index of the variable in the tuple
+                    int index = terms_in_atom.indexOf(var);
+                    if (index != -1) compare_index_list.add(index);
+                    comparisonOperatorList.add(op);
+                }
+                if((term1 instanceof Variable) && (term2 instanceof Constant)){
+                    TypeWrapper wrap2 = new TypeWrapper(term2);
+                    compare_wrap_list.add(wrap2);
+                    Variable var = new Variable(((Variable) term1).getName());
+                    // find the index of the variable in the tuple
+                    int index = terms_in_atom.indexOf(var);
+                    if (index != -1) compare_index_list.add(index);
+                    comparisonOperatorList.add(op);
+                }
+                if((term1 instanceof Variable) && (term2 instanceof Variable)){
+                    // only care those: both variables in atom relation
+                    Variable var1 = new Variable(((Variable) term1).getName());
+                    Variable var2 = new Variable(((Variable) term2).getName());
+                    int index1 = terms_in_atom.indexOf(var1);
+                    int index2 = terms_in_atom.indexOf(var2);
+                    if ((index1 != -1) && (index2 != -1) && (index1 != index2)){
+                        self_compare_map.put(new ArrayList<>(Arrays.asList(index1, index2)), op);
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -27,91 +99,31 @@ public class SelectOperator extends Operator {
 
     @Override
     public Tuple getNextTuple() throws IOException {
-        Tuple next;
-        while ((next = this.child.getNextTuple()) != null) {
-            if (validMatch(next, this.compare_list)) return next;
+        if (return_empty) return null;
+        while ((new_tuple = this.child.getNextTuple()) != null) {
+            if (validMatch()) return new_tuple;
         }
         return null;
     }
 
     public RelationalAtom getRelation_atom(){return this.relation_atom;}
 
-    public boolean validMatch(Tuple tuple, List<ComparisonAtom> compare_list) {
-        // duplicate the tuple for other operation
-        Tuple dp_tuple = new Tuple(tuple);
-        // check query like R(x,y,5)
-        List<Term> terms_in_atom = this.relation_atom.getTerms();
-        for (int i = 0; i < terms_in_atom.size(); i++){
-            if (terms_in_atom.get(i) instanceof Constant){
-                TypeWrapper wrap_in_tup = dp_tuple.getWrapInTuple(i);
-                TypeWrapper wrap_term = new TypeWrapper(terms_in_atom.get(i));
-                if (!(wrap_term.equals(wrap_in_tup))) return false;
-            }
+    public boolean validMatch() {
+        // duplicate in case of writing or changing
+        Tuple tuple = new Tuple(new_tuple);
+        // check first self compare map
+        for (List<Integer> index_pair: self_compare_map.keySet()){
+            ComparisonOperator op = self_compare_map.get(index_pair);
+            TypeWrapper wrap1 = tuple.getWrapInTuple(index_pair.get(0));
+            TypeWrapper wrap2 = tuple.getWrapInTuple(index_pair.get(1));
+            if(!this.Comparing(wrap1, wrap2, op)) return false;
         }
-        for (ComparisonAtom comparison_atom : compare_list) {
-            // if exists one comparison not satisfied, then return false
-            // get the 2 terms and the opeartion
-            Term term1 = comparison_atom.getTerm1();
-            Term term2 = comparison_atom.getTerm2();
-            ComparisonOperator op = comparison_atom.getOp();
-            if (!((term1 instanceof Constant || term1 instanceof Variable)
-                    && (term2 instanceof Constant || term2 instanceof Variable))) {
-                System.out.println("Invalid term format! \n terms must be Constant or Variable");
-                return false;
-            }
-
-            // term1 constant
-            if (term1 instanceof Constant) {
-                // term2 constant
-                if (term2 instanceof Constant) {
-                    TypeWrapper wrap1 = new TypeWrapper(term1);
-                    TypeWrapper wrap2 = new TypeWrapper(term2);
-                    if(!this.Comparing(wrap1, wrap2, op)) return false;
-                }
-                else {
-                    // term2 variable
-                    Variable var = new Variable(((Variable) term2).getName());
-                    TypeWrapper wrap1 = new TypeWrapper(term1);
-                    // find the index of the variable in the tuple
-
-                    int index = terms_in_atom.indexOf(var);
-                    if (index != -1) {
-                        // get the wrap in tuple using the index
-                        TypeWrapper wrap2 = dp_tuple.getWrapInTuple(index);
-                        if(!this.Comparing(wrap1, wrap2, op)) return false;
-                    } // variable does not in the relation
-                }
-            }
-            // term1 variable
-            else {
-                // term2 constant
-                if (term2 instanceof Constant) {
-                    Variable var = new Variable(((Variable) term1).getName());
-                    TypeWrapper wrap2 = new TypeWrapper(term2);
-                    // find the index of the variable in the tuple
-                    int index = terms_in_atom.indexOf(var);
-                    if (index != -1) {
-                        // get the wrap in tuple using the index
-                        TypeWrapper wrap1 = dp_tuple.getWrapInTuple(index);
-                        if(!this.Comparing(wrap1, wrap2, op)) return false;
-                    } // variable does not in the relation
-                }
-                else {
-                    // both variables
-                    Variable var1 = new Variable(((Variable) term1).getName());
-                    Variable var2 = new Variable(((Variable) term2).getName());
-                    int index1 = terms_in_atom.indexOf(var1);
-                    int index2 = terms_in_atom.indexOf(var2);
-                    if ((index1!=-1)&&(index2!=-1)){ // both vars in the relation
-                        // get the wrap in tuple using the index
-                        TypeWrapper wrap1 = dp_tuple.getWrapInTuple(index1);
-                        TypeWrapper wrap2 = dp_tuple.getWrapInTuple(index2);
-                        if(!this.Comparing(wrap1, wrap2, op)) return false;
-                    }
-                    else System.out.println("either term1 or term2 not found in the relation");
-                }
-            }
-
+        // then check the outer comparisons
+        for (int i = 0; i < compare_index_list.size(); i++){
+            TypeWrapper wrap1 = tuple.getWrapInTuple(compare_index_list.get(i));
+            TypeWrapper wrap2 = compare_wrap_list.get(i);
+            ComparisonOperator op = comparisonOperatorList.get(i);
+            if(!this.Comparing(wrap1, wrap2, op)) return false;
         }
         return true;
     }

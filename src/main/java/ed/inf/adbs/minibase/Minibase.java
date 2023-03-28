@@ -75,7 +75,7 @@ public class Minibase {
             ScanOperator scanOperator1 = new ScanOperator(relation1, databaseCatalog);
             RelationalAtom relation2 = relation_body.get(1);
             ScanOperator scanOperator2 = new ScanOperator(relation2, databaseCatalog);
-            JoinOperator joinOperator = new JoinOperator(scanOperator1, scanOperator2, compare_body);
+            JoinOperator joinOperator = new JoinOperator(scanOperator1,scanOperator2, compare_body);
             System.out.println(joinOperator.getNextTuple());
             System.out.println(joinOperator.getNextTuple());
             System.out.println(joinOperator.getNextTuple());
@@ -87,22 +87,8 @@ public class Minibase {
             System.out.println(joinOperator.getNextTuple());
             System.out.println(joinOperator.getNextTuple());
             System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
+
+
 
 //            // call dump() on your ScanOperator to send the results somewhere helpful
 //            List<Tuple> lst = scanOperator.dump();

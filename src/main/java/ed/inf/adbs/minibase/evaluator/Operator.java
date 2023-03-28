@@ -3,6 +3,7 @@ package ed.inf.adbs.minibase.evaluator;
 import base.RelationalAtom;
 import ed.inf.adbs.minibase.structures.Tuple;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,7 @@ public abstract class Operator {
         return tuple_list;
     };
 
-    public RelationalAtom getRelation_atom() {
-        return null;
-    }
+    public abstract RelationalAtom getRelation_atom();
+    public abstract BufferedReader getBr();
 
 }

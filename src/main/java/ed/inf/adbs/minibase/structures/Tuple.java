@@ -41,6 +41,12 @@ public class Tuple {
     public void tupleProjection(TypeWrapper wrap){
         this.tuple.add(wrap);
     }
+    public void add(List<TypeWrapper> tuple){
+        this.tuple.addAll(tuple);
+    }
+    public void removeAll(){
+        tuple.removeAll(tuple);
+    }
 
     public TypeWrapper getWrapInTuple(int i){
         try{
@@ -55,8 +61,6 @@ public class Tuple {
     public void setTuple(List<TypeWrapper> tuple){
         this.tuple = tuple; // can not use this.tuple.addAll(tuple), for all the tuples will append and flatten
     }
-
-    public void add(TypeWrapper wrap){this.tuple.add(wrap);}
 
     @Override
     public String toString(){

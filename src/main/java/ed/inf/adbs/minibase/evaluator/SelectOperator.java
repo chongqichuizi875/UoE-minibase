@@ -5,6 +5,7 @@ import com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar;
 import ed.inf.adbs.minibase.structures.Tuple;
 import ed.inf.adbs.minibase.structures.TypeWrapper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 
@@ -27,7 +28,6 @@ public class SelectOperator extends Operator {
     @Override
     public Tuple getNextTuple() throws IOException {
         Tuple next;
-
         while ((next = this.child.getNextTuple()) != null) {
             if (validMatch(next, this.compare_list)) return next;
         }
@@ -134,4 +134,6 @@ public class SelectOperator extends Operator {
         System.out.println("Invalid comparison symbol! ");
         return false;
     }
+    @Override
+    public BufferedReader getBr(){return child.getBr();}
 }

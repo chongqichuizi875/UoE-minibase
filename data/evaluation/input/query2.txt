@@ -1,1 +1,1 @@
-Q(x,y,z) :- R(x, y, z), x=4
+Q(x,y,z) :- R(x, y, z), x=y

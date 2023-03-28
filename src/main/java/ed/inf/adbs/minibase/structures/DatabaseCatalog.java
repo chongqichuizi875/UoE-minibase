@@ -13,6 +13,7 @@ public class DatabaseCatalog {
     private volatile static DatabaseCatalog singleton;
     private final HashMap<String, String> location_map;
     private final HashMap<String, List<Boolean>> schema_map;
+    private String db_path;
     private DatabaseCatalog() throws IOException {
         String db_path = "data"+File.separator+"evaluation"+File.separator+"db";
         location_map = new HashMap<>();
@@ -45,6 +46,7 @@ public class DatabaseCatalog {
     public HashMap<String, List<Boolean>> getSchema_map() {
         return schema_map;
     }
+
 }
 
 

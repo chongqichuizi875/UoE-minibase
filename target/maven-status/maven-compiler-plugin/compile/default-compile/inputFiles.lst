@@ -1,4 +1,3 @@
-C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\structures\Schema.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\base\IntegerConstant.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\base\Query.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\parser\generated\MinibaseVisitor.java
@@ -28,5 +27,6 @@ C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\mi
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\structures\DatabaseCatalog.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\base\AtomMap.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\base\Variable.java
+C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\evaluator\JoinOperator.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\evaluator\QueryPlan.java
 C:\Users\mrj\Desktop\courses\adbs\Minibase\Minibase\src\main\java\ed\inf\adbs\minibase\evaluator\SelectOperator.java

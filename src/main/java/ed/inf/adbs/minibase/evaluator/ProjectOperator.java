@@ -7,6 +7,7 @@ import base.Variable;
 import ed.inf.adbs.minibase.structures.Tuple;
 import ed.inf.adbs.minibase.structures.TypeWrapper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 
@@ -48,5 +49,12 @@ public class ProjectOperator extends Operator{
 
         }
         return null;
+    }
+    @Override
+    public BufferedReader getBr(){return child.getBr();}
+
+    @Override
+    public RelationalAtom getRelation_atom() {
+        return relation_atom;
     }
 }

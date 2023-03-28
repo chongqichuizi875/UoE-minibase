@@ -11,6 +11,7 @@ import ed.inf.adbs.minibase.structures.TypeWrapper;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,9 @@ public class ScanOperator extends Operator{
     private List<Boolean> schema;
     private RelationalAtom relation_atom;
     private String filepath;
+    private LineNumberReader lineNumberReader;
+    private static int read_head_limit = 10000;
+
 
     public ScanOperator(RelationalAtom atom, DatabaseCatalog catalog){
         this.relation_atom = atom;
@@ -32,12 +36,13 @@ public class ScanOperator extends Operator{
         filepath = catalog.getLocation_map().get(atom_name);
         try{
             this.br = new BufferedReader(new FileReader(filepath));
-            this.br.mark(10000);
+            this.br.mark(read_head_limit);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    @Override
     public RelationalAtom getRelation_atom(){return this.relation_atom;}
 
     @Override
@@ -49,6 +54,7 @@ public class ScanOperator extends Operator{
             this.br = new BufferedReader(new FileReader(filepath));
         }
     }
+
 
     @Override
     public Tuple getNextTuple() throws IOException {
@@ -73,4 +79,6 @@ public class ScanOperator extends Operator{
         }
         return line_wrapper;
     }
+    @Override
+    public BufferedReader getBr(){return br;}
 }

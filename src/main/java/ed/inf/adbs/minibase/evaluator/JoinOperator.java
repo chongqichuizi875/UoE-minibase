@@ -14,11 +14,10 @@ public class JoinOperator extends Operator{
     private List<ComparisonAtom> comparisonAtomList;
     private BufferedReader right_br;
     private Tuple left_previous;
-    private List<Integer> index_left_lis, index_right_lis;
-    private List<ComparisonOperator> comparisonOperatorList;
     private Tuple new_tuple;
     private Set<Tuple> return_set;
     private HashMap<List<Integer>, ComparisonOperator> compare_map;
+    private String relation_name;
 
     public JoinOperator(Operator left_child, Operator right_child, List<ComparisonAtom> comparisonAtomList){
         return_set = new HashSet<>();
@@ -27,23 +26,21 @@ public class JoinOperator extends Operator{
         this.right_child = right_child;
         this.comparisonAtomList = comparisonAtomList;
         this.right_br = new BufferedReader(right_child.getBr());
+
+
         // initialize a new tuple using 'R&S' as name
         new_tuple = new Tuple(left_child.getRelation_atom().getName()+"&"+right_child.getRelation_atom().getName());
+        relation_name = new_tuple.getName();
         // get terms in atom
         List<Term> left_terms = left_child.getRelation_atom().getTerms();
         List<Term> right_terms = right_child.getRelation_atom().getTerms();
-        index_left_lis = new ArrayList<>();
-        index_right_lis = new ArrayList<>();
-        comparisonOperatorList = new ArrayList<>();
+
         // detect implicit equi-join!!
         for (int i = 0; i < left_terms.size(); i++){
             if (left_terms.get(i) instanceof Variable){
                 int index_in_right = right_terms.indexOf(left_terms.get(i));
                 if (index_in_right!=-1){ // find implicit equi-join
                     compare_map.put(new ArrayList<>(Arrays.asList(i, index_in_right)), ComparisonOperator.EQ);
-                    index_left_lis.add(i);
-                    index_right_lis.add(index_in_right);
-                    comparisonOperatorList.add(ComparisonOperator.EQ);
                 }
             }
         }
@@ -56,26 +53,25 @@ public class JoinOperator extends Operator{
                 int index2left = left_terms.indexOf(atom.getTerm2());
                 int index2right = right_terms.indexOf(atom.getTerm2());
                 if ((index1left != -1)&&(index2right != -1)){ // term1 can be found in left child and term2 can be found in right child
-                    index_left_lis.add(index1left);
-                    index_right_lis.add(index2right);
                     compare_map.put(new ArrayList<>(Arrays.asList(index1left, index2right)), atom.getOp());
                 }
                 else if((index1right != -1)&&(index2left != -1)){ // term1 can be found in right child and term2 can be found in left child
-                    index_left_lis.add(index2left);
-                    index_right_lis.add(index1right);
                     compare_map.put(new ArrayList<>(Arrays.asList(index2left, index1right)), atom.getOp());
                 }
                 else { // comparisons like R(x,y,z), S(u,v,w), x=y / x<z / x=c -> in a word: the two terms can not match the two relation separately
                     continue;
                 }
-                comparisonOperatorList.add(atom.getOp());
             }
+
         }
     }
 
     @Override
     public RelationalAtom getRelation_atom() {
-        return left_child.getRelation_atom();
+        String name = relation_name;
+        List<Term> terms = new ArrayList<>(left_child.getRelation_atom().getTerms());
+        terms.addAll(right_child.getRelation_atom().getTerms());
+        return new RelationalAtom(name, terms);
     }
 
     @Override
@@ -90,9 +86,8 @@ public class JoinOperator extends Operator{
 
     @Override
     public Tuple getNextTuple() throws IOException {
-
-
         Tuple left_next;
+        Tuple new_tuple = new Tuple(relation_name);
         if (left_previous!=null){
             new_tuple = getNextTupleOnlyMovingRight(left_previous);
             if (new_tuple != null) {
@@ -125,15 +120,7 @@ public class JoinOperator extends Operator{
                     break;
                 }
             }
-//            for (int i = 0; i < index_left_lis.size(); i++){
-//                TypeWrapper leftwrap = left.getWrapInTuple(index_left_lis.get(i));
-//                TypeWrapper rightwrap = right.getWrapInTuple(index_right_lis.get(i));
-//                ComparisonOperator op = comparisonOperatorList.get(i);
-//                if (!(Comparing(leftwrap, rightwrap, op))){
-//                    equal = false;
-//                    break;
-//                }
-//            }
+
             if (equal) {
                 new_tuple.add(left.getTuple());
                 new_tuple.add(right.getTuple());

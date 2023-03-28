@@ -1,1 +1,1 @@
-Q(x,y,z) :- R(x, y, z)
+Q(x, y, z, u, SUM(y*y)) :- R(x, y, u), R(x, y, z), x>y

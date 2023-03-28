@@ -40,53 +40,41 @@ public class Minibase {
         try{
             // parse the query from the input file
             Query query = QueryParser.parse(Paths.get(inputFile));
-//            QueryPlan queryPlan = new QueryPlan(query);
-//            System.out.println(queryPlan.getNextTuple());
-//            System.out.println(queryPlan.getNextTuple());
-//            System.out.println(queryPlan.getNextTuple());
-//            System.out.println(queryPlan.getNextTuple());
-//            queryPlan.reset();
-//            System.out.println("----------------------------------------");
-//            System.out.println(queryPlan.getNextTuple());
-//            System.out.println(queryPlan.getNextTuple());
-//            System.out.println(queryPlan.getNextTuple());
-//            queryPlan.reset();
-//            System.out.println("----------------------------------------");
-//            List<Tuple> lst = queryPlan.dump();
-//            for (Tuple tp: lst){
-//                System.out.println(tp);
+            QueryPlan queryPlan = new QueryPlan(query);
+            List<Tuple> dump_list = queryPlan.dump();
+            for(Tuple tuple:dump_list) System.out.println(tuple);
+
+
+//            System.out.println("Original query: "+ query);
+//            Head head = query.getHead();
+//            List<Atom> body = query.getBody();
+//            // body type transform
+//            List<RelationalAtom> relation_body = new ArrayList<>();
+//            List<ComparisonAtom> compare_body = new ArrayList<>();
+//            for (Atom i: body){
+//                if (i instanceof RelationalAtom) relation_body.add((RelationalAtom) i);
+//                else if (i instanceof ComparisonAtom) compare_body.add((ComparisonAtom) i);
 //            }
-
-
-            System.out.println("Original query: "+ query);
-            Head head = query.getHead();
-            List<Atom> body = query.getBody();
-            // body type transform
-            List<RelationalAtom> relation_body = new ArrayList<>();
-            List<ComparisonAtom> compare_body = new ArrayList<>();
-            for (Atom i: body){
-                if (i instanceof RelationalAtom) relation_body.add((RelationalAtom) i);
-                else if (i instanceof ComparisonAtom) compare_body.add((ComparisonAtom) i);
-            }
-            DatabaseCatalog databaseCatalog = DatabaseCatalog.getCatalog();
-            // construct a ScanOperator for the relation in the body of the query
-            /* Scan*/
-            RelationalAtom relation1 = relation_body.get(0);
-            ScanOperator scanOperator1 = new ScanOperator(relation1, databaseCatalog);
-            RelationalAtom relation2 = relation_body.get(1);
-            ScanOperator scanOperator2 = new ScanOperator(relation2, databaseCatalog);
-            JoinOperator joinOperator = new JoinOperator(scanOperator1,scanOperator2, compare_body);
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
-            System.out.println(joinOperator.getNextTuple());
+//            DatabaseCatalog databaseCatalog = DatabaseCatalog.getCatalog();
+//            // construct a ScanOperator for the relation in the body of the query
+//            /* Scan*/
+//            RelationalAtom relation1 = relation_body.get(0);
+//            ScanOperator scanOperator1 = new ScanOperator(relation1, databaseCatalog);
+//            RelationalAtom relation2 = relation_body.get(1);
+//            ScanOperator scanOperator2 = new ScanOperator(relation2, databaseCatalog);
+//            JoinOperator joinOperator = new JoinOperator(scanOperator1,scanOperator2, compare_body);
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(joinOperator.getNextTuple());
+//            System.out.println(Arrays.toString(joinOperator.getRelation_atom().getName().split("&")));
 
 
 

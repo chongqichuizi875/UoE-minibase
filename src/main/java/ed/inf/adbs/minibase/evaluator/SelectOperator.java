@@ -100,27 +100,28 @@ public class SelectOperator extends Operator {
     @Override
     public Tuple getNextTuple() throws IOException {
         if (return_empty) return null;
+        Tuple new_tuple = new Tuple(getRelation_atom().getName());
         while ((new_tuple = this.child.getNextTuple()) != null) {
-            if (validMatch()) return new_tuple;
+            if (validMatch(new_tuple)) return new_tuple;
         }
         return null;
     }
 
     public RelationalAtom getRelation_atom(){return this.relation_atom;}
 
-    public boolean validMatch() {
+    public boolean validMatch(Tuple tuple) {
         // duplicate in case of writing or changing
-        Tuple tuple = new Tuple(new_tuple);
+        Tuple new_tuple = new Tuple(tuple);
         // check first self compare map
         for (List<Integer> index_pair: self_compare_map.keySet()){
             ComparisonOperator op = self_compare_map.get(index_pair);
-            TypeWrapper wrap1 = tuple.getWrapInTuple(index_pair.get(0));
-            TypeWrapper wrap2 = tuple.getWrapInTuple(index_pair.get(1));
+            TypeWrapper wrap1 = new_tuple.getWrapInTuple(index_pair.get(0));
+            TypeWrapper wrap2 = new_tuple.getWrapInTuple(index_pair.get(1));
             if(!this.Comparing(wrap1, wrap2, op)) return false;
         }
         // then check the outer comparisons
         for (int i = 0; i < compare_index_list.size(); i++){
-            TypeWrapper wrap1 = tuple.getWrapInTuple(compare_index_list.get(i));
+            TypeWrapper wrap1 = new_tuple.getWrapInTuple(compare_index_list.get(i));
             TypeWrapper wrap2 = compare_wrap_list.get(i);
             ComparisonOperator op = comparisonOperatorList.get(i);
             if(!this.Comparing(wrap1, wrap2, op)) return false;

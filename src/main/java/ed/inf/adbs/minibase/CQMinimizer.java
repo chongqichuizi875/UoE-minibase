@@ -50,7 +50,7 @@ public class CQMinimizer {
             System.out.println("Before: " + query);
             // use a hashmap to store the map relation
             HashMap<Variable, Term> relation_map = new HashMap<>();
-            while (removeOne(head, relation_body, relation_map));
+            while (removeOne(head, relation_body));
             Query new_query = new Query(head, relation_body);
             System.out.println("After: " + new_query);
 
@@ -61,7 +61,7 @@ public class CQMinimizer {
             e.printStackTrace();
         }
     }
-    public static boolean removeOne(Head head, List<RelationalAtom> body, HashMap<Variable, Term> relation_map){
+    public static boolean removeOne(Head head, List<RelationalAtom> body){
         AtomMap atom_map = new AtomMap();
         // compare each pair of atom in body
         for (int i = 0; i < body.size(); i++){

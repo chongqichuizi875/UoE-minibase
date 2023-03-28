@@ -17,20 +17,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ScanOperator extends Operator{
-    private Tuple tuple;
     private List<Term> original_terms;
     private BufferedReader br;
     private List<Boolean> schema;
     private RelationalAtom relation_atom;
     private String filepath;
-    private LineNumberReader lineNumberReader;
     private static int read_head_limit = 10000;
 
 
     public ScanOperator(RelationalAtom atom, DatabaseCatalog catalog){
         this.relation_atom = atom;
         String atom_name = atom.getName();
-        this.tuple = new Tuple(atom_name); // get the relation/table/atom name
 
         this.schema = catalog.getSchema_map().get(atom_name);
         filepath = catalog.getLocation_map().get(atom_name);
@@ -59,10 +56,11 @@ public class ScanOperator extends Operator{
     @Override
     public Tuple getNextTuple() throws IOException {
         String next;
+        Tuple new_tuple = new Tuple(relation_atom.getName());
         try{
             if ((next = br.readLine())!=null){
-                this.tuple.setTuple(LineWrapper(next));
-                return this.tuple;
+                new_tuple.setTuple(LineWrapper(next));
+                return new_tuple;
             }
         } catch (NullPointerException e){
             e.printStackTrace();

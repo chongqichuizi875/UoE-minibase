@@ -9,19 +9,22 @@ import ed.inf.adbs.minibase.structures.TypeWrapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ProjectOperator extends Operator{
     private Operator child;
     private List<Variable> projection_list;
     private RelationalAtom relation_atom;
-    private Tuple new_tuple;
+    private Set<TypeWrapper> out_put_set;
 
     public ProjectOperator(Operator child, Head head){
         this.child = child;
         this.projection_list = head.getVariables();
         this.relation_atom = child.getRelation_atom();
-        new_tuple = new Tuple(this.relation_atom.getName());
+        out_put_set = new HashSet<>();
     }
 
 
@@ -33,6 +36,7 @@ public class ProjectOperator extends Operator{
     @Override
     public Tuple getNextTuple() throws IOException {
         Tuple next;
+        Tuple new_tuple = new Tuple(getRelation_atom().getName());
         // initialize a new tuple having same name with the child
         List<Term> terms = this.relation_atom.getTerms();
         while ((next = this.child.getNextTuple()) != null) {
@@ -41,10 +45,13 @@ public class ProjectOperator extends Operator{
                     if (head_var.equals(terms.get(i))){
                         // get the ith item in Tuple
                         new_tuple.tupleProjection(next.getWrapInTuple(i));
+                        break; // To avoid Q(x, y, z, u) :- R(x, y, u), R(x, y, z) printing (x,x,y,y,z,u)
                     }
                 }
             }
-            if (new_tuple.getTuple().size() != 0) return new_tuple;
+            if (new_tuple.getTuple().size() != 0) {
+                return new_tuple;
+            }
 
         }
         return null;

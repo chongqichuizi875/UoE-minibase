@@ -7,7 +7,6 @@ base\Atom.class
 ed\inf\adbs\minibase\parser\QueryParser$ConstantVisitor.class
 ed\inf\adbs\minibase\parser\QueryParser$VariableVisitor.class
 ed\inf\adbs\minibase\parser\QueryParser$RelationalAtomVisitor.class
-ed\inf\adbs\minibase\structures\Node.class
 base\IntegerConstant.class
 ed\inf\adbs\minibase\parser\generated\MinibaseParser$ConstantContext.class
 ed\inf\adbs\minibase\parser\generated\MinibaseParser$ComparisonAtomContext.class

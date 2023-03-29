@@ -1,43 +1,29 @@
 package ed.inf.adbs.minibase.evaluator;
 
 import base.*;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import ed.inf.adbs.minibase.CQMinimizer;
-import ed.inf.adbs.minibase.parser.QueryParser;
 import ed.inf.adbs.minibase.structures.DatabaseCatalog;
 import ed.inf.adbs.minibase.structures.Tuple;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 public class QueryPlan {
-    private Head head;
-    private List<Atom> body;
-    private List<RelationalAtom> relation_body;
-    private List<ComparisonAtom> compare_body;
-    private DatabaseCatalog databaseCatalog;
-    private ScanOperator scanOperator;
-    private SelectOperator selectOperator;
-    private Operator current_root;
-    private List<SelectOperator> selectOperatorList;
-    private List<JoinOperator> joinOperatorList;
-    private Boolean need_agg;
+    private final Operator current_root;
 
     public QueryPlan(Query query) throws IOException {
         // parse the query from the input file
-        databaseCatalog = DatabaseCatalog.getCatalog();
+        DatabaseCatalog databaseCatalog = DatabaseCatalog.getCatalog();
         System.out.println("Original query: "+ query);
-        this.head = query.getHead();
-        this.body = query.getBody();
-        if (head.getSumAggregate()!=null) need_agg = true; // need group-by agg
-        else need_agg = false;
+        Head head = query.getHead();
+        List<Atom> body = query.getBody();
+        boolean need_agg;
+        need_agg = head.getSumAggregate() != null; // need group-by agg
         // body type transform
-        this.relation_body = new ArrayList<>();
-        this.compare_body = new ArrayList<>();
-        selectOperatorList = new ArrayList<>();
-        joinOperatorList = new ArrayList<>();
+        List<RelationalAtom> relation_body = new ArrayList<>();
+        List<ComparisonAtom> compare_body = new ArrayList<>();
+        List<SelectOperator> selectOperatorList = new ArrayList<>();
         for (Atom i: body){
             if (i instanceof RelationalAtom) {
                 relation_body.add((RelationalAtom) i);
@@ -45,11 +31,11 @@ public class QueryPlan {
             else if (i instanceof ComparisonAtom) compare_body.add((ComparisonAtom) i);
         }
         while (CQMinimizer.removeOne(head, relation_body));
-        System.out.println("Query after parsing: "+head+" :- "+relation_body+compare_body);
+        System.out.println("Query after parsing: "+ head +" :- "+ relation_body + compare_body);
         // build the leaf scan operators
         for (RelationalAtom atom: relation_body) {
             // build the select operators
-            selectOperatorList.add(new SelectOperator(new ScanOperator(atom, databaseCatalog),atom,compare_body));
+            selectOperatorList.add(new SelectOperator(new ScanOperator(atom, databaseCatalog),atom, compare_body));
         }
         if (selectOperatorList.size() == 0) current_root = null; // no Relation
         else if (selectOperatorList.size() == 1) { // no join
@@ -59,7 +45,7 @@ public class QueryPlan {
         else {
             JoinOperator join_root = new JoinOperator(selectOperatorList.get(0), selectOperatorList.get(1), compare_body);
             for (int i = 1; i < selectOperatorList.size()-1; i++){
-                join_root = new JoinOperator(join_root, selectOperatorList.get(i+1),compare_body);
+                join_root = new JoinOperator(join_root, selectOperatorList.get(i+1), compare_body);
             }
             current_root = (need_agg) ? new SumOperator(join_root, head):
                     new ProjectOperator(join_root, head);

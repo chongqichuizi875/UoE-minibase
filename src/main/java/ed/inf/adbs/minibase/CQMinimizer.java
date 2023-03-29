@@ -49,7 +49,6 @@ public class CQMinimizer {
             }
             System.out.println("Before: " + query);
             // use a hashmap to store the map relation
-            HashMap<Variable, Term> relation_map = new HashMap<>();
             while (removeOne(head, relation_body));
             Query new_query = new Query(head, relation_body);
             System.out.println("After: " + new_query);
@@ -113,12 +112,11 @@ public class CQMinimizer {
 
     public static boolean removeAtom(Head head, List<RelationalAtom> relation_body, AtomMap atom_map){
         Integer atom_to_remove = atom_map.getAtom_to_remove();
-        HashMap<Variable, Term> term_map = atom_map.getTerm_map();
         List<Variable> head_var = head.getVariables();
         // generate a new body for duplicate
         List<RelationalAtom> new_body = new ArrayList<>();
         for (RelationalAtom atom: relation_body) new_body.add(new RelationalAtom(atom));
-        // remove the aton in new_body
+        // remove the atom in new_body
         new_body.remove((int) atom_to_remove);
         // check if all head variables still exist in body \ {alpha}
         // gather all the variables in body \ {alpha}
@@ -164,7 +162,7 @@ public class CQMinimizer {
 
             System.out.println("Entire query: " + query);
             Head head = query.getHead();
-            System.out.println("");
+            System.out.println();
             System.out.println("Head: " + head);
             List<Atom> body = query.getBody();
             for (Atom i : body){

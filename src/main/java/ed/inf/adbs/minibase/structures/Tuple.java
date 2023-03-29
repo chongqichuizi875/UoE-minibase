@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public class Tuple {
     private List<TypeWrapper> tuple;
-    private String name;
+    private final String name;
     public Tuple(){
         this.name = null;
         this.tuple = new ArrayList<>();
@@ -29,10 +29,6 @@ public class Tuple {
         return this.name;
     }
 
-    public void setName(String name){
-        this.name = name;
-    }
-
 
     public List<TypeWrapper> getTuple(){
         return this.tuple;
@@ -45,7 +41,7 @@ public class Tuple {
         this.tuple.addAll(tuple);
     }
     public void removeAll(){
-        tuple.removeAll(tuple);
+        tuple.clear();
     }
 
     public TypeWrapper getWrapInTuple(int i){

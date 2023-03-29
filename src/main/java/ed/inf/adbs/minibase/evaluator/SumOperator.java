@@ -11,22 +11,17 @@ import java.util.HashMap;
 import java.util.List;
 
 public class SumOperator extends Operator{
-    private Operator child;
-    private SumAggregate aggregate;
-    private List<Tuple> dump_list;
-    private List<Term> relation_body;
-    private List<Variable> head_variables;
-    private HashMap<List<TypeWrapper>, Integer> group_map;
-    private Integer mul;
+    private final Operator child;
+    private final HashMap<List<TypeWrapper>, Integer> group_map;
     List<Integer> group_column_list, agg_column_list;
-    private List<List<TypeWrapper>> retrive_list; // store the key of group_map for getNextTuple
+    private final List<List<TypeWrapper>> retrieve_list; // store the key of group_map for getNextTuple
     public SumOperator(Operator child, Head head) throws IOException {
-        aggregate = head.getSumAggregate();
+        SumAggregate aggregate = head.getSumAggregate();
         this.child = child;
-        head_variables = head.getVariables();
-        dump_list = new ArrayList<>(child.dump()); // all the tuple by child
-        relation_body = getRelation_atom().getTerms(); // terms in relation (compare with head variables)
-        retrive_list = new ArrayList<>();
+        List<Variable> head_variables = head.getVariables();
+        List<Tuple> dump_list = new ArrayList<>(child.dump()); // all the tuple by child
+        List<Term> relation_body = getRelation_atom().getTerms(); // terms in relation (compare with head variables)
+        retrieve_list = new ArrayList<>();
         group_map = new HashMap<>();
         group_column_list = new ArrayList<>();
         agg_column_list = new ArrayList<>();
@@ -37,10 +32,10 @@ public class SumOperator extends Operator{
         }
         // parse the aggregate
         List<Term> agg_terms = aggregate.getProductTerms();
-        mul = 1; // use a mul to represent the results of all constant multiply
+        Integer mul_const = 1; // use a mul to represent the results of all constant multiply
         for (Term term: agg_terms){
             if (term instanceof IntegerConstant) {
-                mul *= ((IntegerConstant) term).getValue();
+                mul_const *= ((IntegerConstant) term).getValue();
             }
             else { // find the column index corresponding to the term
                 // assuming var in head must be in relation_body, its child's or sql writer's responsibility
@@ -61,11 +56,11 @@ public class SumOperator extends Operator{
             }
             // then use group_mark_list as hash key
             if(group_map.containsKey(group_mark_list)){
-                group_map.put(group_mark_list, group_map.get(group_mark_list) + this.mul*mul);
+                group_map.put(group_mark_list, group_map.get(group_mark_list) + mul_const * mul);
             }
             else {
-                group_map.put(group_mark_list, this.mul*mul);
-                retrive_list.add(group_mark_list); // group_map.size() == retrive_list.size()
+                group_map.put(group_mark_list, mul_const * mul);
+                retrieve_list.add(group_mark_list); // group_map.size() == retrieve_list.size()
             }
         }
 
@@ -79,7 +74,7 @@ public class SumOperator extends Operator{
     @Override
     public Tuple getNextTuple(){
         if (!group_map.isEmpty()) {
-            List<TypeWrapper> key_group = retrive_list.remove(0);
+            List<TypeWrapper> key_group = retrieve_list.remove(0);
             Tuple new_tuple = new Tuple(getRelation_atom().getName());
             new_tuple.add(key_group);
             new_tuple.tupleProjection(new TypeWrapper((int) group_map.remove(key_group)));

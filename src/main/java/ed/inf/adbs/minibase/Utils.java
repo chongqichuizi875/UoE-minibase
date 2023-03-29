@@ -7,7 +7,7 @@ public class Utils {
 
     public static String join(Collection<?> c, String delimiter) {
         return c.stream()
-                .map(x -> x.toString())
+                .map(Object::toString)
                 .collect(Collectors.joining(delimiter));
     }
 }

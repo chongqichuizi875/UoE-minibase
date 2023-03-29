@@ -2,27 +2,23 @@ package ed.inf.adbs.minibase.evaluator;
 
 
 import base.RelationalAtom;
-import base.Term;
 import ed.inf.adbs.minibase.structures.DatabaseCatalog;
 import ed.inf.adbs.minibase.structures.Tuple;
 import ed.inf.adbs.minibase.structures.TypeWrapper;
 
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ScanOperator extends Operator{
-    private List<Term> original_terms;
     private BufferedReader br;
-    private List<Boolean> schema;
-    private RelationalAtom relation_atom;
-    private String filepath;
-    private static int read_head_limit = 10000;
+    private final List<Boolean> schema;
+    private final RelationalAtom relation_atom;
+    private final String filepath;
+    private static final int read_head_limit = 10000;
 
 
     public ScanOperator(RelationalAtom atom, DatabaseCatalog catalog){

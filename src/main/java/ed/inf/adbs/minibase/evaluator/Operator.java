@@ -22,7 +22,7 @@ public abstract class Operator {
         }
         reset();
         return tuple_list;
-    };
+    }
 
     public abstract RelationalAtom getRelation_atom();
     public abstract BufferedReader getBr();

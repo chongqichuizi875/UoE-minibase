@@ -66,7 +66,7 @@ public class TypeWrapper {
     }
 
     public int compareTo(Object obj){
-        return (this.toString().compareTo(((TypeWrapper) obj).toString()));
+        return (this.toString().compareTo(obj.toString()));
     }
     public boolean isGreaterThan(Object obj){
         if (obj instanceof TypeWrapper){

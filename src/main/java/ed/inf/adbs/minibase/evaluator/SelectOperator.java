@@ -1,41 +1,34 @@
 package ed.inf.adbs.minibase.evaluator;
 
 import base.*;
-import com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar;
 import ed.inf.adbs.minibase.structures.Tuple;
 import ed.inf.adbs.minibase.structures.TypeWrapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class SelectOperator extends Operator {
-    private Operator child;
-    private RelationalAtom relation_atom;
-    private List<ComparisonAtom> comparisonAtomList;
-    private List<Term> terms_in_atom;
-    private List<Integer> compare_index_list;
-    private List<TypeWrapper> compare_wrap_list;
-    private List<ComparisonOperator> comparisonOperatorList;
+    private final Operator child;
+    private final RelationalAtom relation_atom;
+    private final List<Integer> compare_index_list;
+    private final List<TypeWrapper> compare_wrap_list;
+    private final List<ComparisonOperator> comparisonOperatorList;
     private boolean return_empty;
-    private HashMap<List<Integer>, ComparisonOperator> self_compare_map;
-    private Tuple new_tuple;
+    private final HashMap<List<Integer>, ComparisonOperator> self_compare_map;
 
     public SelectOperator(Operator child, RelationalAtom relation_atom, List<ComparisonAtom> compare_list) {
         return_empty = false;
         this.child = child;
         this.relation_atom = relation_atom;
-        this.comparisonAtomList = compare_list;
         this.compare_index_list = new ArrayList<>();
         this.compare_wrap_list = new ArrayList<>();
         this.comparisonOperatorList = new ArrayList<>();
         this.self_compare_map = new HashMap<>();
         List<Term> terms_in_atom = this.relation_atom.getTerms();
-        new_tuple = new Tuple(relation_atom.getName());
         // detect implicit comparison R(x, y, 4)
         for (int i = 0; i < terms_in_atom.size(); i++){
             Term term = terms_in_atom.get(i);
@@ -45,7 +38,7 @@ public class SelectOperator extends Operator {
                 compare_wrap_list.add(new TypeWrapper(term));
             }
         }
-        for (ComparisonAtom comparison_atom : comparisonAtomList){
+        for (ComparisonAtom comparison_atom : compare_list){
             Term term1 = comparison_atom.getTerm1();
             Term term2 = comparison_atom.getTerm2();
             ComparisonOperator op = comparison_atom.getOp();
@@ -100,7 +93,7 @@ public class SelectOperator extends Operator {
     @Override
     public Tuple getNextTuple() throws IOException {
         if (return_empty) return null;
-        Tuple new_tuple = new Tuple(getRelation_atom().getName());
+        Tuple new_tuple;
         while ((new_tuple = this.child.getNextTuple()) != null) {
             if (validMatch(new_tuple)) return new_tuple;
         }

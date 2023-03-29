@@ -1,17 +1,14 @@
 package ed.inf.adbs.minibase;
 
-import base.*;
-import ed.inf.adbs.minibase.evaluator.*;
+import base.Atom;
+import base.Head;
+import base.Query;
+import ed.inf.adbs.minibase.evaluator.QueryPlan;
 import ed.inf.adbs.minibase.parser.QueryParser;
-import ed.inf.adbs.minibase.structures.DatabaseCatalog;
 import ed.inf.adbs.minibase.structures.Tuple;
-import ed.inf.adbs.minibase.structures.TypeWrapper;
 
-import javax.swing.plaf.synth.SynthDesktopIconUI;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -44,68 +41,6 @@ public class Minibase {
             QueryPlan queryPlan = new QueryPlan(query);
             List<Tuple> dump_list = queryPlan.dump();
             for(Tuple tuple:dump_list) System.out.println(tuple);
-
-
-//            System.out.println("Original query: "+ query);
-//            Head head = query.getHead();
-//            List<Atom> body = query.getBody();
-//            // body type transform
-//            List<RelationalAtom> relation_body = new ArrayList<>();
-//            List<ComparisonAtom> compare_body = new ArrayList<>();
-//            for (Atom i: body){
-//                if (i instanceof RelationalAtom) relation_body.add((RelationalAtom) i);
-//                else if (i instanceof ComparisonAtom) compare_body.add((ComparisonAtom) i);
-//            }
-//            DatabaseCatalog databaseCatalog = DatabaseCatalog.getCatalog();
-//            // construct a ScanOperator for the relation in the body of the query
-//            /* Scan*/
-//            RelationalAtom relation1 = relation_body.get(0);
-//            ScanOperator scanOperator1 = new ScanOperator(relation1, databaseCatalog);
-//            RelationalAtom relation2 = relation_body.get(1);
-//            ScanOperator scanOperator2 = new ScanOperator(relation2, databaseCatalog);
-//            JoinOperator joinOperator = new JoinOperator(scanOperator1,scanOperator2, compare_body);
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(joinOperator.getNextTuple());
-//            System.out.println(Arrays.toString(joinOperator.getRelation_atom().getName().split("&")));
-
-
-
-//            // call dump() on your ScanOperator to send the results somewhere helpful
-//            List<Tuple> lst = scanOperator.dump();
-//            System.out.println("----------------------------------------");
-//            for (Tuple tp: lst){
-//                System.out.println(tp);
-//            }
-//            System.out.println("----------------------------------------");
-//            /* Select*/
-//            SelectOperator selectOperator = new SelectOperator(scanOperator, relation, compare_body);
-//            System.out.println(selectOperator.getNextTuple());
-//            System.out.println(selectOperator.getNextTuple());
-//            System.out.println(selectOperator.getNextTuple());
-//            System.out.println("----------------------------------------");
-//            /* Projection*/
-//            // p1 has child scan , p2 has child select
-//            ProjectOperator projectOperator1 = new ProjectOperator(scanOperator, head);
-//            ProjectOperator projectOperator2 = new ProjectOperator(selectOperator, head);
-//            projectOperator1.reset();
-//            System.out.println("p1: " + projectOperator1.getNextTuple());
-//            System.out.println("p1: " + projectOperator1.getNextTuple());
-//            System.out.println("p1: " + projectOperator1.getNextTuple());
-//            projectOperator2.reset();
-//            System.out.println("p2: " + projectOperator2.getNextTuple());
-//            System.out.println("p2: " + projectOperator2.getNextTuple());
-//            System.out.println("p2: " + projectOperator2.getNextTuple());
-
-
         } catch (IOException e) {
             System.err.println("Exception occurred during Scan Operation");
             e.printStackTrace();

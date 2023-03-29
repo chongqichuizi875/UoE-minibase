@@ -1,8 +1,10 @@
 package ed.inf.adbs.minibase.structures;
 
 
-import java.io.*;
-import java.security.PublicKey;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,8 +15,7 @@ public class DatabaseCatalog {
     private volatile static DatabaseCatalog singleton;
     private final HashMap<String, String> location_map;
     private final HashMap<String, List<Boolean>> schema_map;
-    private String db_path;
-    private DatabaseCatalog() throws IOException {
+    private DatabaseCatalog() {
         String db_path = "data"+File.separator+"evaluation"+File.separator+"db";
         location_map = new HashMap<>();
         schema_map = new HashMap<>();
@@ -25,13 +26,13 @@ public class DatabaseCatalog {
                 List<String> ls = new ArrayList<>(Arrays.asList(next.split(" ")));
                 String name = ls.remove(0);
                 location_map.put(name, db_path+File.separator+"files"+File.separator+name+".csv");
-                schema_map.put(name, (List<Boolean>) ls.stream().map(s->s.equals("string")).collect(Collectors.toList()));
+                schema_map.put(name, ls.stream().map(s->s.equals("string")).collect(Collectors.toList()));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    public static DatabaseCatalog getCatalog() throws IOException {
+    public static DatabaseCatalog getCatalog() {
         if (singleton == null){ // reduce the unnecessary synchronization
             synchronized (DatabaseCatalog.class){ // synchronization for thread safety
                 if (singleton == null) singleton = new DatabaseCatalog();

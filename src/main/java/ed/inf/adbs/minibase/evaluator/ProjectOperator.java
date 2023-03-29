@@ -5,7 +5,6 @@ import base.RelationalAtom;
 import base.Term;
 import base.Variable;
 import ed.inf.adbs.minibase.structures.Tuple;
-import ed.inf.adbs.minibase.structures.TypeWrapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,10 +13,10 @@ import java.util.List;
 import java.util.Set;
 
 public class ProjectOperator extends Operator{
-    private Operator child;
-    private List<Variable> projection_list;
-    private RelationalAtom relation_atom;
-    private Set<Tuple> out_put_set;
+    private final Operator child;
+    private final List<Variable> projection_list;
+    private final RelationalAtom relation_atom;
+    private final Set<Tuple> out_put_set;
 
     public ProjectOperator(Operator child, Head head){
         this.child = child;

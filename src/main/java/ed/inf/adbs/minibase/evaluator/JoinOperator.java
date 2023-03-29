@@ -9,37 +9,32 @@ import java.io.IOException;
 import java.util.*;
 
 public class JoinOperator extends Operator{
-    private Operator left_child;
-    private Operator right_child;
-    private List<ComparisonAtom> comparisonAtomList;
-    private BufferedReader right_br;
+    private final Operator left_child;
+    private final Operator right_child;
     private Tuple left_previous;
-    private Tuple new_tuple;
-    private Set<Tuple> return_set;
-    private HashMap<List<Integer>, ComparisonOperator> compare_map;
-    private String relation_name;
+    private final Set<Tuple> return_set;
+    private final HashMap<List<Integer>, ComparisonOperator> compare_map;
+    private final String relation_name;
 
     public JoinOperator(Operator left_child, Operator right_child, List<ComparisonAtom> comparisonAtomList){
         return_set = new HashSet<>();
         compare_map = new HashMap<>();
         this.left_child = left_child;
         this.right_child = right_child;
-        this.comparisonAtomList = comparisonAtomList;
-        this.right_br = new BufferedReader(right_child.getBr());
 
 
         // initialize a new tuple using 'R&S' as name
-        new_tuple = new Tuple(left_child.getRelation_atom().getName()+"&"+right_child.getRelation_atom().getName());
+        Tuple new_tuple = new Tuple(left_child.getRelation_atom().getName() + "&" + right_child.getRelation_atom().getName());
         relation_name = new_tuple.getName();
         // get terms in atom
         List<Term> left_terms = left_child.getRelation_atom().getTerms();
         List<Term> right_terms = right_child.getRelation_atom().getTerms();
 
-        // detect implicit equi-join!!
+        // detect implicit equality-join!!
         for (int i = 0; i < left_terms.size(); i++){
             if (left_terms.get(i) instanceof Variable){
                 int index_in_right = right_terms.indexOf(left_terms.get(i));
-                if (index_in_right!=-1){ // find implicit equi-join
+                if (index_in_right!=-1){ // find implicit equality-join
                     compare_map.put(new ArrayList<>(Arrays.asList(i, index_in_right)), ComparisonOperator.EQ);
                 }
             }
@@ -58,9 +53,8 @@ public class JoinOperator extends Operator{
                 else if((index1right != -1)&&(index2left != -1)){ // term1 can be found in right child and term2 can be found in left child
                     compare_map.put(new ArrayList<>(Arrays.asList(index2left, index1right)), atom.getOp());
                 }
-                else { // comparisons like R(x,y,z), S(u,v,w), x=y / x<z / x=c -> in a word: the two terms can not match the two relation separately
-                    continue;
-                }
+                // comparisons like R(x,y,z), S(u,v,w), x=y / x<z / x=c -> in a word: the two terms can not match the two relation separately
+
             }
 
         }
@@ -68,10 +62,9 @@ public class JoinOperator extends Operator{
 
     @Override
     public RelationalAtom getRelation_atom() {
-        String name = relation_name;
         List<Term> terms = new ArrayList<>(left_child.getRelation_atom().getTerms());
         terms.addAll(right_child.getRelation_atom().getTerms());
-        return new RelationalAtom(name, terms);
+        return new RelationalAtom(relation_name, terms);
     }
 
     @Override
@@ -86,8 +79,7 @@ public class JoinOperator extends Operator{
 
     @Override
     public Tuple getNextTuple() throws IOException {
-        Tuple left_next;
-        Tuple new_tuple = new Tuple(relation_name);
+        Tuple left_next, new_tuple;
         if (left_previous!=null){
             new_tuple = getNextTupleOnlyMovingRight(left_previous);
             if (new_tuple != null) {
@@ -112,10 +104,10 @@ public class JoinOperator extends Operator{
         while ((right = right_child.getNextTuple())!=null){ // right child next
             boolean equal = true;
             for (List<Integer> index_list: compare_map.keySet()){
-                TypeWrapper leftwrap = left.getWrapInTuple(index_list.get(0));
-                TypeWrapper rightwrap = right.getWrapInTuple(index_list.get(1));
+                TypeWrapper left_wrap = left.getWrapInTuple(index_list.get(0));
+                TypeWrapper right_wrap = right.getWrapInTuple(index_list.get(1));
                 ComparisonOperator op = compare_map.get(index_list);
-                if (!(Comparing(leftwrap, rightwrap, op))){
+                if (!(Comparing(left_wrap, right_wrap, op))){
                     equal = false;
                     break;
                 }

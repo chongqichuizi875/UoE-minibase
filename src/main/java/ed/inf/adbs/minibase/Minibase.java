@@ -7,6 +7,7 @@ import ed.inf.adbs.minibase.structures.DatabaseCatalog;
 import ed.inf.adbs.minibase.structures.Tuple;
 import ed.inf.adbs.minibase.structures.TypeWrapper;
 
+import javax.swing.plaf.synth.SynthDesktopIconUI;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;

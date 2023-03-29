@@ -58,7 +58,7 @@ public class ScanOperator extends Operator{
         String next;
         Tuple new_tuple = new Tuple(relation_atom.getName());
         try{
-            if ((next = br.readLine())!=null){
+            if (((next = br.readLine())!=null) && next.length()>0){
                 new_tuple.setTuple(LineWrapper(next));
                 return new_tuple;
             }
@@ -72,8 +72,8 @@ public class ScanOperator extends Operator{
     public List<TypeWrapper> LineWrapper(String str){
         List<TypeWrapper> line_wrapper = new ArrayList<>();
         List<String> ls = Arrays.asList(str.split(","));
-        for (int i = 0; i<this.schema.size();i++){
-            line_wrapper.add(new TypeWrapper(this.schema.get(i), ls.get(i).trim()));
+        for (int i = 0; i<schema.size();i++){
+            line_wrapper.add(new TypeWrapper(schema.get(i), ls.get(i).trim()));
         }
         return line_wrapper;
     }

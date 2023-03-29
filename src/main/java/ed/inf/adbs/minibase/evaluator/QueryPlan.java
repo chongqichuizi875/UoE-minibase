@@ -1,6 +1,7 @@
 package ed.inf.adbs.minibase.evaluator;
 
 import base.*;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import ed.inf.adbs.minibase.CQMinimizer;
 import ed.inf.adbs.minibase.parser.QueryParser;
 import ed.inf.adbs.minibase.structures.DatabaseCatalog;
@@ -22,6 +23,7 @@ public class QueryPlan {
     private Operator current_root;
     private List<SelectOperator> selectOperatorList;
     private List<JoinOperator> joinOperatorList;
+    private Boolean need_agg;
 
     public QueryPlan(Query query) throws IOException {
         // parse the query from the input file
@@ -29,6 +31,8 @@ public class QueryPlan {
         System.out.println("Original query: "+ query);
         this.head = query.getHead();
         this.body = query.getBody();
+        if (head.getSumAggregate()!=null) need_agg = true; // need group-by agg
+        else need_agg = false;
         // body type transform
         this.relation_body = new ArrayList<>();
         this.compare_body = new ArrayList<>();
@@ -49,18 +53,17 @@ public class QueryPlan {
         }
         if (selectOperatorList.size() == 0) current_root = null; // no Relation
         else if (selectOperatorList.size() == 1) { // no join
-            current_root = new ProjectOperator(selectOperatorList.get(0), head);
+            current_root = (need_agg) ? new SumOperator(selectOperatorList.get(0), head):
+                    new ProjectOperator(selectOperatorList.get(0), head);
         }
         else {
             JoinOperator join_root = new JoinOperator(selectOperatorList.get(0), selectOperatorList.get(1), compare_body);
             for (int i = 1; i < selectOperatorList.size()-1; i++){
                 join_root = new JoinOperator(join_root, selectOperatorList.get(i+1),compare_body);
             }
-            current_root = new ProjectOperator(join_root, head);
-        }
-        SumAggregate head_terms;
-        if ((head_terms = head.getSumAggregate())!=null){ // need group-by agg
-            System.out.println("has agg!!!");
+            current_root = (need_agg) ? new SumOperator(join_root, head):
+                    new ProjectOperator(join_root, head);
+
         }
     }
 

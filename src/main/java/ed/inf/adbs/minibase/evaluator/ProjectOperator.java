@@ -9,7 +9,6 @@ import ed.inf.adbs.minibase.structures.TypeWrapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,38 +17,34 @@ public class ProjectOperator extends Operator{
     private Operator child;
     private List<Variable> projection_list;
     private RelationalAtom relation_atom;
-    private Set<TypeWrapper> out_put_set;
+    private Set<Tuple> out_put_set;
 
     public ProjectOperator(Operator child, Head head){
         this.child = child;
-        this.projection_list = head.getVariables();
-        this.relation_atom = child.getRelation_atom();
+        projection_list = head.getVariables();
+        relation_atom = child.getRelation_atom();
         out_put_set = new HashSet<>();
     }
 
 
     @Override
     public void reset() throws IOException {
-        this.child.reset();
+        child.reset();
     }
 
     @Override
     public Tuple getNextTuple() throws IOException {
         Tuple next;
-        Tuple new_tuple = new Tuple(getRelation_atom().getName());
         // initialize a new tuple having same name with the child
-        List<Term> terms = this.relation_atom.getTerms();
-        while ((next = this.child.getNextTuple()) != null) {
-            for (Variable head_var: this.projection_list){ // variables in head
-                for (int i = 0; i < terms.size(); i++){ // variables in relational atom
-                    if (head_var.equals(terms.get(i))){
-                        // get the ith item in Tuple
-                        new_tuple.tupleProjection(next.getWrapInTuple(i));
-                        break; // To avoid Q(x, y, z, u) :- R(x, y, u), R(x, y, z) printing (x,x,y,y,z,u)
-                    }
-                }
+        List<Term> terms = relation_atom.getTerms();
+        while ((next = child.getNextTuple()) != null) {
+            Tuple new_tuple = new Tuple(getRelation_atom().getName());
+            for (Variable head_var: projection_list){ // variables in head
+                int index = terms.indexOf(head_var); // assume index != -1. its child's business!
+                new_tuple.tupleProjection(next.getWrapInTuple(index));
             }
-            if (new_tuple.getTuple().size() != 0) {
+            if ((new_tuple.getTuple().size() != 0) && (!out_put_set.contains(new_tuple))) {
+                out_put_set.add(new_tuple);
                 return new_tuple;
             }
 

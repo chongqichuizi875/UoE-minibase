@@ -1,1 +1,1 @@
-Q(x, y, z, u, w, t, SUM(y*y)) :- R(x, y, z), S(u, w, x), u > x
+Q(x, y, z, u, w, t) :- R(x, y, z), S(u, w, t), x = u

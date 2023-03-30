@@ -37,12 +37,10 @@ public class Minibase {
         try{
             // parse the query from the input file
             Query query = QueryParser.parse(Paths.get(inputFile));
-//            Atom atom = query.getBody().get(1);
-//            ComparisonAtom ra = (ComparisonAtom) atom;
-//            System.out.println(ra.getTerm2().getClass());
-//            System.out.println(ra.getTerm1().getClass());
+            // initialize a QueryPlan class for processing query
             QueryPlan queryPlan = new QueryPlan(query);
             List<Tuple> dump_list;
+            // dump the search results
             dump_list = queryPlan.dump();
             for(Tuple tuple:dump_list) System.out.println(tuple);
         } catch (IOException e) {

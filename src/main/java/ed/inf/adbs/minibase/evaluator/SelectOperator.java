@@ -12,6 +12,17 @@ import java.util.HashMap;
 import java.util.List;
 
 public class SelectOperator extends Operator {
+    /**
+     *                  child:  logic child
+     *          relation_atom:  the relation to be selected
+     *     compare_index_list:  column index of the variable needed to be compared
+     *      compare_wrap_list:  a list of TypeWrapper for wrapping the scanned terms
+     * comparisonOperatorList:  the comparison list of all the comparisons need to be computed
+     *           return_empty:  if true, getNextTuple will always return null
+     *                          (for early detected situation e.g. 'a'='b' will always be false)
+     *       self_compare_map:  map of self comparison like R(x,x) but it seems will not happen
+     *
+     * */
     private final Operator child;
     private final RelationalAtom relation_atom;
     private final List<Integer> compare_index_list;
@@ -21,14 +32,22 @@ public class SelectOperator extends Operator {
     private final HashMap<List<Integer>, ComparisonOperator> self_compare_map;
 
     public SelectOperator(Operator child, RelationalAtom relation_atom, List<ComparisonAtom> compare_list) {
+        /**
+         * constructor. find the columns needed to be compared
+         * @params:
+         *          child:  logic child of the operation tree
+         *  relation_atom:  RelationAtom, the relation to be selected
+         *   compare_list:  a list of comparisons conditions
+         *
+         * */
         return_empty = false;
         this.child = child;
         this.relation_atom = relation_atom;
+        remaining_compare_list = new ArrayList<>(compare_list);
         compare_index_list = new ArrayList<>();
         compare_wrap_list = new ArrayList<>();
         comparisonOperatorList = new ArrayList<>();
         self_compare_map = new HashMap<>();
-        remaining_compare_list = new ArrayList<>(compare_list);
         List<Term> terms_in_atom = this.relation_atom.getTerms();
         // detect implicit comparison R(x, y, 4)
         for (int i = 0; i < terms_in_atom.size(); i++){
@@ -39,6 +58,7 @@ public class SelectOperator extends Operator {
                 compare_wrap_list.add(new TypeWrapper(term));
             }
         }
+        // for loop the comparisons to detect whether we should apply other comparisons
         for (ComparisonAtom comparison_atom : compare_list){
             Term term1 = comparison_atom.getTerm1();
             Term term2 = comparison_atom.getTerm2();
@@ -65,6 +85,9 @@ public class SelectOperator extends Operator {
                         compare_index_list.add(index);
                         compare_wrap_list.add(wrap1);
                         comparisonOperatorList.add(op);
+                        // if one comparison has been calculated, then we can delete it from the
+                        // comparison list passing to the next stage (like another select, join, projection)
+                        // which can reduce some computing
                         remaining_compare_list.remove(comparison_atom);
                     }
 
@@ -106,6 +129,12 @@ public class SelectOperator extends Operator {
 
     @Override
     public Tuple getNextTuple() throws IOException {
+        /**
+         * if the child's nextTuple is not null, then judge whether it is valid according to comparisons
+         * @return:
+         *   null:  if return empty(e.g. in the initialization detecting 'adbs' = 'ppls')
+         *  Tuple:  a new tuple selected according to the child's nextTuple and the comparisons
+         * */
         if (return_empty) return null;
         Tuple new_tuple;
         while ((new_tuple = this.child.getNextTuple()) != null) {
@@ -118,6 +147,14 @@ public class SelectOperator extends Operator {
     public RelationalAtom getRelation_atom(){return this.relation_atom;}
 
     public boolean validMatch(Tuple tuple) {
+        /**
+         * Test whether the child's next tuple is valid under the comparisons
+         * @return:
+         *   true:  if valid
+         *  false:  if not valid, the tuple not match all the comparisons
+         * @params:
+         *  tuple:  tuple to be tested
+         * */
         // duplicate in case of writing or changing
         Tuple new_tuple = new Tuple(tuple);
         // check first self compare map

@@ -49,11 +49,10 @@ public class CQMinimizer {
             }
             System.out.println("Before: " + query);
             // use a hashmap to store the map relation
+            // If there are persistent atoms that can be deleted, program will stay in this while loop
             while (removeOne(head, relation_body));
             Query new_query = new Query(head, relation_body);
             System.out.println("After: " + new_query);
-
-
         }
         catch (Exception e){
             System.err.println("Exception occurred during parsing");
@@ -61,7 +60,19 @@ public class CQMinimizer {
         }
     }
     public static boolean removeOne(Head head, List<RelationalAtom> body){
-        AtomMap atom_map = new AtomMap();
+        /**
+         * removing one relation atom at a time
+         * conduct a loop to find whether there exists a valid map
+         * from one relation to another(term by term)
+         * if the map is found, try to delete the mapped one.
+         * @return:
+         *   true:  if there is one atom successfully removed
+         *  false:  if no additional relation atom deleted during the whole loop
+         * @params:
+         *   head:  query head
+         *   body:  query body, a list of Relation atoms
+         * */
+        AtomMap atom_map = new AtomMap(); // use an AtomMap to map from Variable to Term
         // compare each pair of atom in body
         for (int i = 0; i < body.size(); i++){
             RelationalAtom atom1 = body.get(i);
@@ -111,8 +122,21 @@ public class CQMinimizer {
     }
 
     public static boolean removeAtom(Head head, List<RelationalAtom> relation_body, AtomMap atom_map){
-        Integer atom_to_remove = atom_map.getAtom_to_remove();
-        List<Variable> head_var = head.getVariables();
+        /**
+         * test if the atom {alpha} can be removed
+         * by testing if all the variables in head still exists in body \ {alpha}
+         * @return:
+         *           true:  if all term in head still in body \ alpha and alpha successfully removed
+         *          false:  not all terms in head still remains in body \ alpha, so can not delete
+         * @params:
+         *           head:  query head
+         *  relation_body:  body part, list of relation atoms
+         *       atom_map:  the AtomMap class used to describe the map relationship from
+         *                  a variable to a term
+         *                  (since only variable can map to other terms)
+         * */
+        Integer atom_to_remove = atom_map.getAtom_to_remove(); // the index of the atom to remove
+        List<Variable> head_var = head.getVariables(); // head variables
         // generate a new body for duplicate
         List<RelationalAtom> new_body = new ArrayList<>();
         for (RelationalAtom atom: relation_body) new_body.add(new RelationalAtom(atom));

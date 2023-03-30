@@ -1,1 +1,1 @@
-Q(x,y,z,v,w,t,q) :- R(x, y, z), S(u, v, w), R(x,s,q), T(r,t), q!='ppls', w<4, s>3, 'shit'!='adbs', t<100, x=u
+Q(x,y,z) :- R(x, y, z), S(u,v,w), R(q,w,e), q=u

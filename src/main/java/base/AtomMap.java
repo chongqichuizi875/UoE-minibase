@@ -3,8 +3,8 @@ package base;
 import java.util.HashMap;
 
 public class AtomMap {
-    public Integer atom_to_remove, atom_pointed;
-    public HashMap<Variable, Term> term_map;
+    private Integer atom_to_remove, atom_pointed;
+    private HashMap<Variable, Term> term_map;
 
     public AtomMap(HashMap<Variable, Term> term_map, Integer atom_to_remove, Integer atom_pointed){
         this.term_map = new HashMap<>(term_map);

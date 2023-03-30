@@ -13,6 +13,13 @@ import java.util.List;
 import java.util.Set;
 
 public class ProjectOperator extends Operator{
+    /**
+     *
+     *           child:  operator child
+     * projection_list:  variables need to be projected
+     *   relation_atom:  relation atom containing tuples
+     *     out_put_set:  a set to prevent duplication output
+     * */
     private final Operator child;
     private final List<Variable> projection_list;
     private final RelationalAtom relation_atom;
@@ -33,6 +40,11 @@ public class ProjectOperator extends Operator{
 
     @Override
     public Tuple getNextTuple() throws IOException {
+        /**
+         * according to the variables of head to decide which columns to
+         * output. And projection may encounter duplication, so use a set
+         * to prevent it.
+         * */
         Tuple next;
         // initialize a new tuple having same name with the child
         List<Term> terms = relation_atom.getTerms();

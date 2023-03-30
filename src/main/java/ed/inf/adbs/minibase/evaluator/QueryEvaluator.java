@@ -8,6 +8,25 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 
 public class QueryEvaluator {
+    /**
+     *                                 head:  query head
+     *                   relationalAtomList:  relation atoms of the original query
+     *                   comparisonAtomList:  comparison atoms of the original query
+     *            mapRelationNameToAtomList:  Map name (R, S, T) to relations R(x,y,z), S(u,v,w)
+     *                   listOfRelationList:  each sub list contains relation atoms with same name
+     *                                         -> [[R(x,y,z),R(x,y,w)],[S(q,p)]]
+     *                 listOfComparisonList: each sub list contains comparison list for select operator
+     *                                         -> [[x>5, y<v], [u='shit']]
+     *        mapRelationNameToVariableList:  map the relation name to a list of variables exists in its corresponding relation
+     * mapRelationNameToOutsideVariableList:  map the relation name to a list of variables exists in all others' relation
+     *                     allVariablesList:  the sum of all the list in mapRelationNameToVariableList, u
+     *                                        sed for computing mapRelationNameToOutsideVariableList
+     *               mapVariableToAtomIndex:  maintain position of each variable in each relation
+     *                                         (each sub list assign to corresponding relation)
+     *                newMapIndexToVariable:  when the new relation atoms (shorter) are generated, use a map to maintain
+     *                                         the relationship between variables and index
+     *
+     * */
     private Head head;
     private List<RelationalAtom> relationalAtomList;
     private List<ComparisonAtom> comparisonAtomList;
@@ -25,6 +44,16 @@ public class QueryEvaluator {
 
     private List<String> JoinOrderList = new ArrayList<>(); // maintain the join order of the tree
     public QueryEvaluator(Head head, List<RelationalAtom> relationalAtomList, List<ComparisonAtom> comparisonAtomList){
+        /**
+         * Constructor.
+         * 1: generate maps and lists containing information of query
+         *    (which term appear in which relation, its index, the order of them...)
+         * 2: rearrange the relation atoms according to its variables
+         *    and assign the generated comparisons to them
+         * 3: generate new maps according to the rearranged relation atoms
+         * 4: according to the new maps and old maps, do some replacement of the
+         *    original comparisons and assign them to corresponding relation atoms
+         * */
         // do some initialization
         this.head = head;
         this.relationalAtomList = relationalAtomList;
@@ -121,6 +150,10 @@ public class QueryEvaluator {
     public List<List<RelationalAtom>> getListOfRelationList(){return listOfRelationList;}
     public List<List<ComparisonAtom>> getListOfComparisonList(){return listOfComparisonList;}
     public void generateNewMapIndexToVariable(){
+        /**
+         * generate the new map according to the newly generated relation atom lists
+         * gather the information of variables and their indexes in each relation atom
+         * */
         for (List<RelationalAtom> atomList: listOfRelationList){
             // we build another map to search for variables for replacement in the new query
             // if new query: Q(x,y):- R(x,y), then map<R, 0> -> x, map<R, 1> -> y
@@ -132,9 +165,10 @@ public class QueryEvaluator {
 
                         HashMap<String, Integer> map = new HashMap<>();
                         map.put(atom_name, index);
+                        // e.g. R(x,y),R(x,z), then map<R,1> -> [y,z]
                         if (newMapIndexToVariable.containsKey(map)){
                             newMapIndexToVariable.get(map).add((Variable) term);
-                            allVariablesInNewQuery.add((Variable) term);
+                            allVariablesInNewQuery.add((Variable) term); // gather all variables remaining in atoms
                         }
                         else {
                             List<Variable> lst= new ArrayList<>();
@@ -148,11 +182,17 @@ public class QueryEvaluator {
         }
     }
     public void generateRelationMap(){
+        /**
+         * generate some maps reflecting the relationships between the head variables,
+         *  variables of each relation atom, and the index of them.
+         * */
         // generate the mapRelationNameToList and JoinOrderList
-        for (RelationalAtom atom : relationalAtomList) {
+        for (RelationalAtom atom : relationalAtomList) { // for each atom
             if (!JoinOrderList.contains(atom.getName())){
-                JoinOrderList.add(atom.getName());
+                JoinOrderList.add(atom.getName()); // maintain a join order list
+                                                   // so we can keep the order of join
             }
+            // e.g. R -> [R(x,y,z), R(x,y,w)]
             if (mapRelationNameToAtomList.containsKey(atom.getName())) {
                 mapRelationNameToAtomList.get(atom.getName()).add(atom);
             } else {
@@ -164,6 +204,7 @@ public class QueryEvaluator {
 
         for (String atom_name: mapRelationNameToAtomList.keySet()){
             // generate several maps and lists to maintain the info of original query
+            // e.g. R -> [x,y,z,w]
             mapRelationNameToVariableList.put(atom_name, new ArrayList<>());
             for (RelationalAtom atom: mapRelationNameToAtomList.get(atom_name)){
                 List<Term> terms = atom.getTerms();
@@ -172,7 +213,8 @@ public class QueryEvaluator {
                             !(mapRelationNameToVariableList.get(atom_name).contains(term))) {
                         // the map contains distinct variables exists in each relation
                         mapRelationNameToVariableList.get(atom_name).add((Variable) term);
-                        allVariablesList.add((Variable) term);
+                        allVariablesList.add((Variable) term); // e.g. [x,y,z,u,v,w,m,n]
+                        // e.g. for R(x,y,z):  x -> map<R, 0>, and y -> map<R, 1>
                         if (mapVariableToAtomIndex.containsKey((Variable) term)){
                             // variable already exists in one place
                             HashMap<String, Integer> map = new HashMap<>();
@@ -204,6 +246,18 @@ public class QueryEvaluator {
         }
     }
     public HashMap<Integer, List<Variable>> buildIndexMap(List<RelationalAtom> atomList, List<Variable> head_vars){
+        /**
+         * build the indexMap for each position of each relation
+         * aiming at finding replacements of the variables which have been kicked out of the newly generated
+         * relation atoms, but still exists in the original comparisons
+         * e.g. Q(x,y):- R(x,y),R(x,z),z=2 --> the z=2 in the original comparisons should change to y=2
+         * @return
+         *  i ndexMap:  a hashmap mapping from the position index of one atom to a list of variables who are
+         *                    at that position
+         * @params:
+         *   atomList:  a list of atoms with same name
+         *  head_vars:  list of variables in head
+         * */
         // in each relation atom
         // map the index of variable in the relation atom to a list for removing unnecessary variables or constants
         // e.g. Q(x,y,z):- R(x,y,z),R(x,y,c), so 2 -> [z,c], finally z will remain and c discarded
@@ -228,6 +282,18 @@ public class QueryEvaluator {
         return indexMap;
     }
     public RelationalAtom getNewAtom(List<RelationalAtom> atomList, HashMap<Integer, List<Variable>> indexMap, int relation_id, List<ComparisonAtom> newComparisonList){
+        /**
+         * according to the variables in atoms and in head, we can rearrange the relation atom, delete some unnecessary variables
+         * even unnecessary relation atoms. We use a map of relation variable position index to decide which variable should be
+         * kept and which atom should be kept.
+         * @return:
+         *           new_atom:  return a RelationalAtom each time for a loop of all the relation atoms with the same name
+         * @params:
+         *           atomList:  [R1, R2, R3...] a list of relation atoms
+         *           indexMap:  e.g. Q(x,y,z):- R(x,y,z),R(x,y,c), so 2 -> [z,c]. Position index -> all variables exists in that place
+         *        relation_id:  the relation index in the atomList
+         *  newComparisonList:  gather the newly generated comparisons
+         * */
         // iterate each index in a relation e.g. (0,1,2) for R(x,y,z)
         RelationalAtom new_atom = new RelationalAtom(atomList.get(0).getName());
         for (int i = 0; i < atomList.get(0).getTerms().size(); i++) {
@@ -284,6 +350,17 @@ public class QueryEvaluator {
         return new_atom;
     }
     public void transformOriginalComparisonAtomList(List<ComparisonAtom> comparisonAtomList){
+        /**
+         * splitting the original comparisons, assigning them into corresponding relations
+         * e.g. x>5 assign to R(x,y,z), u='adbs' assign to S(u,v,w). And if exists variables that
+         * no longer exist in the new relation atoms: Q(x,y):- R(x,y),R(x,z),z=3 -> Q(x,y):- R(x,y),y=3
+         * now in this function
+         * we can fetch where z belong to(R, index at 1), and find in the newly generated map that
+         * at (R, index at 1) there are replacement y still exists in head variables, so we replace z with y!
+         * @params:
+         *  comparisonAtomList:  all the original comparisons in the old query
+         *
+         * */
         for (String atom_name: JoinOrderList){ // follow the same order as we measure the generated comparisons
             // in the end of for loop, combine the generated comparisons and original comparisons
             int combineListId = JoinOrderList.indexOf(atom_name);
@@ -352,6 +429,16 @@ public class QueryEvaluator {
 
     }
     public ComparisonAtom getNewComparisonAtom(String atomName, ComparisonAtom atom, boolean isLeft){
+        /**
+         * the utils function for replacing one term in the comparison atom
+         * @return:
+         *     null:  if atom==null, or we can not find a replacement for the term
+         *  newAtom:  return a new ComparisonAtom instance replacing left or right of its terms
+         * @params:
+         *  atomName:  name of the atom
+         *  atom:  the ComparisonAtom which we want to replace part of it
+         *  isLeft:  true -> replace the left term(term1), false -> term2
+         * */
         if (atom == null) return null;
         // if isLeft, term1 will be replaced, else term2
         Term term1 = atom.getTerm1();

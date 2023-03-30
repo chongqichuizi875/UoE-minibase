@@ -2,6 +2,7 @@ package base;
 
 import ed.inf.adbs.minibase.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RelationalAtom extends Atom {
@@ -9,9 +10,21 @@ public class RelationalAtom extends Atom {
 
     private List<Term> terms;
 
+    public RelationalAtom(String name){
+        this.name = name;
+        terms = new ArrayList<>();
+    }
     public RelationalAtom(RelationalAtom atom){
         this.name = atom.getName();
         this.terms = atom.getTerms();
+    }
+
+    public void addTerm(Term term){
+        terms.add(term);
+    }
+
+    public void replaceTerm(int index, Term term){
+        terms.set(index, term);
     }
 
     public RelationalAtom(String name, List<Term> terms) {

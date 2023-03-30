@@ -31,4 +31,19 @@ public class ComparisonAtom extends Atom {
         return term1 + " " + op + " " + term2;
     }
 
+    @Override
+    public boolean equals(Object obj){
+        return (obj instanceof ComparisonAtom) &&
+                (term1.getClass().equals(((ComparisonAtom) obj).getTerm1().getClass())) &&
+                (term2.getClass().equals(((ComparisonAtom) obj).getTerm2().getClass())) &&
+                (term1.toString().equals(((ComparisonAtom) obj).getTerm1().toString())) &&
+                (term2.toString().equals(((ComparisonAtom) obj).getTerm2().toString())) &&
+                (op.toString().equals(((ComparisonAtom) obj).getOp().toString()));
+    }
+
+    @Override
+    public int hashCode(){
+        return 17*31 + this.toString().hashCode();
+    }
+
 }

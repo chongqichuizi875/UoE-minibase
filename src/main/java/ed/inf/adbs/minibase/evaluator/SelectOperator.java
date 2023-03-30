@@ -24,10 +24,11 @@ public class SelectOperator extends Operator {
         return_empty = false;
         this.child = child;
         this.relation_atom = relation_atom;
-        this.compare_index_list = new ArrayList<>();
-        this.compare_wrap_list = new ArrayList<>();
-        this.comparisonOperatorList = new ArrayList<>();
-        this.self_compare_map = new HashMap<>();
+        compare_index_list = new ArrayList<>();
+        compare_wrap_list = new ArrayList<>();
+        comparisonOperatorList = new ArrayList<>();
+        self_compare_map = new HashMap<>();
+        remaining_compare_list = new ArrayList<>(compare_list);
         List<Term> terms_in_atom = this.relation_atom.getTerms();
         // detect implicit comparison R(x, y, 4)
         for (int i = 0; i < terms_in_atom.size(); i++){
@@ -49,27 +50,36 @@ public class SelectOperator extends Operator {
             else {
                 // both terms are variable or constant
                 if ((term1 instanceof Constant) && (term2 instanceof Constant)){ // 2 constants
+                    remaining_compare_list.remove(comparison_atom);
                     TypeWrapper wrap1 = new TypeWrapper(term1);
                     TypeWrapper wrap2 = new TypeWrapper(term2);
                     if(!this.Comparing(wrap1, wrap2, op)) return_empty = true;
+
                 }
                 if((term1 instanceof Constant) && (term2 instanceof Variable)){
                     TypeWrapper wrap1 = new TypeWrapper(term1);
-                    compare_wrap_list.add(wrap1);
                     Variable var = new Variable(((Variable) term2).getName());
                     // find the index of the variable in the tuple
                     int index = terms_in_atom.indexOf(var);
-                    if (index != -1) compare_index_list.add(index);
-                    comparisonOperatorList.add(op);
+                    if (index != -1) {
+                        compare_index_list.add(index);
+                        compare_wrap_list.add(wrap1);
+                        comparisonOperatorList.add(op);
+                        remaining_compare_list.remove(comparison_atom);
+                    }
+
                 }
                 if((term1 instanceof Variable) && (term2 instanceof Constant)){
                     TypeWrapper wrap2 = new TypeWrapper(term2);
-                    compare_wrap_list.add(wrap2);
                     Variable var = new Variable(((Variable) term1).getName());
                     // find the index of the variable in the tuple
                     int index = terms_in_atom.indexOf(var);
-                    if (index != -1) compare_index_list.add(index);
-                    comparisonOperatorList.add(op);
+                    if (index != -1) {
+                        compare_wrap_list.add(wrap2);
+                        compare_index_list.add(index);
+                        comparisonOperatorList.add(op);
+                        remaining_compare_list.remove(comparison_atom);
+                    }
                 }
                 if((term1 instanceof Variable) && (term2 instanceof Variable)){
                     // only care those: both variables in atom relation
@@ -79,10 +89,14 @@ public class SelectOperator extends Operator {
                     int index2 = terms_in_atom.indexOf(var2);
                     if ((index1 != -1) && (index2 != -1) && (index1 != index2)){
                         self_compare_map.put(new ArrayList<>(Arrays.asList(index1, index2)), op);
+                        remaining_compare_list.remove(comparison_atom);
                     }
                 }
             }
         }
+        System.out.println("SelectionOperator for "+relation_atom+" with comparison "+compare_list);
+        System.out.println("remaining_compare_list: "+remaining_compare_list);
+        System.out.println("----------------------------------------------------------------------------------------");
     }
 
     @Override
@@ -99,6 +113,7 @@ public class SelectOperator extends Operator {
         }
         return null;
     }
+
 
     public RelationalAtom getRelation_atom(){return this.relation_atom;}
 

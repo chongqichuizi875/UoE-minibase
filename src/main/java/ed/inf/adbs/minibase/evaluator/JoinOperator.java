@@ -7,6 +7,7 @@ import ed.inf.adbs.minibase.structures.TypeWrapper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class JoinOperator extends Operator{
     private final Operator left_child;
@@ -16,11 +17,17 @@ public class JoinOperator extends Operator{
     private final HashMap<List<Integer>, ComparisonOperator> compare_map;
     private final String relation_name;
 
-    public JoinOperator(Operator left_child, Operator right_child, List<ComparisonAtom> comparisonAtomList){
+    public JoinOperator(Operator left_child, Operator right_child){
         return_set = new HashSet<>();
         compare_map = new HashMap<>();
         this.left_child = left_child;
         this.right_child = right_child;
+        // calculate the union comparisonAtomList of left and right child
+        List<ComparisonAtom> union_compare_list = left_child.getRemaining_compare_list().parallelStream().collect(Collectors.toList());
+        List<ComparisonAtom> union_compare_list2 = right_child.getRemaining_compare_list().parallelStream().collect(Collectors.toList());
+        union_compare_list.addAll(union_compare_list2);
+        List<ComparisonAtom> comparisonAtomList = union_compare_list.stream().distinct().collect(Collectors.toList());
+        remaining_compare_list = new ArrayList<>(comparisonAtomList);
 
 
         // initialize a new tuple using 'R&S' as name
@@ -49,15 +56,24 @@ public class JoinOperator extends Operator{
                 int index2right = right_terms.indexOf(atom.getTerm2());
                 if ((index1left != -1)&&(index2right != -1)){ // term1 can be found in left child and term2 can be found in right child
                     compare_map.put(new ArrayList<>(Arrays.asList(index1left, index2right)), atom.getOp());
+                    remaining_compare_list.remove(atom);
                 }
                 else if((index1right != -1)&&(index2left != -1)){ // term1 can be found in right child and term2 can be found in left child
                     compare_map.put(new ArrayList<>(Arrays.asList(index2left, index1right)), atom.getOp());
+                    remaining_compare_list.remove(atom);
                 }
                 // comparisons like R(x,y,z), S(u,v,w), x=y / x<z / x=c -> in a word: the two terms can not match the two relation separately
+            }
+            else {
+                // there might x != 'ppls' or other comparisons with one variable and another constant
+                // by selection operator, no comparisons with 2 constants will be left to this stage
 
             }
-
         }
+        System.out.println("JoinOperator for "+left_child.getRelation_atom()+" and "+right_child.getRelation_atom()+
+                " with comparison "+ comparisonAtomList);
+        System.out.println("remaining_compare_list: "+remaining_compare_list);
+        System.out.println("----------------------------------------------------------------------------------------");
     }
 
     @Override

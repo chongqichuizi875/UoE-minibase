@@ -1,5 +1,6 @@
 package ed.inf.adbs.minibase.evaluator;
 
+import base.ComparisonAtom;
 import base.ComparisonOperator;
 import base.RelationalAtom;
 import ed.inf.adbs.minibase.structures.Tuple;
@@ -12,6 +13,7 @@ import java.util.List;
 
 
 public abstract class Operator {
+    protected List<ComparisonAtom> remaining_compare_list;
     public abstract void reset() throws IOException;
     public abstract Tuple getNextTuple() throws IOException;
     public List<Tuple> dump() throws IOException {
@@ -23,6 +25,7 @@ public abstract class Operator {
         reset();
         return tuple_list;
     }
+    public List<ComparisonAtom> getRemaining_compare_list(){return remaining_compare_list;}
 
     public abstract RelationalAtom getRelation_atom();
     public abstract BufferedReader getBr();

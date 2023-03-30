@@ -23,6 +23,7 @@ base\RelationalAtom.class
 base\SumAggregate.class
 base\Term.class
 ed\inf\adbs\minibase\Minibase.class
+ed\inf\adbs\minibase\evaluator\QueryEvaluator.class
 ed\inf\adbs\minibase\parser\generated\MinibaseVisitor.class
 ed\inf\adbs\minibase\structures\DatabaseCatalog.class
 ed\inf\adbs\minibase\CQMinimizer.class
